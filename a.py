@@ -1,83 +1,84 @@
-from flask import Flask, request, Response
-from urllib.parse import urlencode
-import os
-
 # =======================================================
-#             חלק A (ה-Controller) עם התיקון המוכח
+#             חלק B (המנתב - Router) - גרסה מעודכנת
 # =======================================================
 
-app = Flask(__name__)
-
-@app.route('/', methods=['POST', 'GET'])
-def flask_controller():
-    # התיקון הקריטי: מאחד את הנתונים לא משנה אם הגיעו ב-POST או ב-GET
-    all_params = request.form if request.method == 'POST' else request.args
-    
-    final_response_string = yemot_service(all_params)
-    return Response(final_response_string, mimetype='text/plain; charset=UTF-8')
-
-
-# =======================================================
-#             חלק B (המנתב - Router)
-# =======================================================
 def yemot_service(request_params):
     x = request_params.get("x")
     if x == "1":
-        # קוראים לפונקציית המחשבון
+        # קריאה לפונקציית המחשבון
         return a(request_params)
-    return "id_list_message=t-פעולה לא מוגדרת"
+    
+    # --- התוספת החדשה ---
+    elif x == "2":
+        # קריאה לפונקציית אבן, נייר ומספריים
+        return b(request_params)
+    
+    # אם לא נמצאה פונקציה מתאימה
+    return "id_list_message=t-פעולה לא מוגדרת"```
 
+### שלב 2: בניית חלק C החדש (המשחק עצמו)
 
+עכשיו ניצור את הפונקציה החדשה שלנו, שכל כולה מוקדשת למשחק. נקרא לה `b`. היא תפעל גם כן בשיטת ה"שלבים".
+
+הנה הקוד שצריך להוסיף לקובץ `a.py`, מתחת לחלק של המחשבון.
+
+```python
 # =======================================================
-#        חלק C ('a') - המחשבון הרב-שלבי, גרסה סופית
+#        חלק C-2 (פונקציה 'b') - אבן, נייר ומספריים
 # =======================================================
-def a(params):
-    # תומך גם ב-step וגם ב-STEP למקרה חירום
-    step = params.get("step", params.get("STEP", "1"))
+def b(params):
+    
+    # נצטרך את 'random' בשביל הבחירה של המחשב
+    import random
+    
+    step = params.get("step", "1")
 
-    # שלב 1: בקשת המספר הראשון
+    # --- שלב 1: קבלת פנים ובקשת בחירה מהשחקן ---
     if step == "1":
-        prompt = "t-ברוך הבא למחשבון, אנא הקש את המספר הראשון"
-        return_path_params = urlencode({'x': '1', 'step': '2'})
-        return f"read={prompt}=num1,,/?{return_path_params}"
-        
-    # שלב 2: בקשת פעולה
+        prompt = "t-ברוכים הבאים לאבן נייר ומספריים. אנא בחר: 1 לאבן, 2 לנייר, או 3 למספריים"
+        # אחרי הבחירה, נחזור לשלב 2
+        return_path = f"/?x=2&step=2"
+        # נקבל קלט מהמשתמש ונשמור אותו במשתנה 'choice'
+        return f"read={prompt}=choice,,1,1,{return_path}"
+
+    # --- שלב 2: קבלת הבחירה, חישוב התוצאה והכרזה ---
     elif step == "2":
-        num1 = params.get("num1")
-        prompt = "t-הקש פעולה. 1 חיבור, 2 חיסור, 3 כפל, 4 חילוק, 5 חזקה"
-        return_path_params = urlencode({'x': '1', 'step': '3', 'saved_num1': num1})
-        return f"read={prompt}=op,,1,1,/?{return_path_params}"
+        user_choice = params.get("choice")
 
-    # שלב 3: בקשת מספר שני
-    elif step == "3":
-        num1_saved = params.get("saved_num1")
-        op_saved = params.get("op")
-        prompt = "t-אנא הקש את המספר השני"
-        return_path_params = urlencode({'x': '1', 'step': '4', 'saved_num1': num1_saved, 'saved_op': op_saved})
-        return f"read={prompt}=num2,,/?{return_path_params}"
+        # נוודא שהקלט תקין
+        if not user_choice or user_choice not in ["1", "2", "3"]:
+            return "id_list_message=t-בחירה לא חוקית. נסה שנית.&go_to_folder=/?x=2&step=1"
         
-    # שלב 4: ביצוע החישוב
-    elif step == "4":
-        a_str, b_str, c_str = params.get("saved_num1"), params.get("saved_op"), params.get("num2")
-        d = ""
-        try:
-            a, b, c = float(a_str), b_str, float(c_str)
-            if b == '1': d = a + c
-            elif b == '2': d = a - c
-            elif b == '3': d = a * c
-            elif b == '4': d = "לא ניתן לחלק באפס" if c == 0 else round(a / c, 2)
-            elif b == '5': d = a ** c
-            else: d = "פעולה לא חוקית"
-        except:
-            d = "שגיאה בערכים"
+        # בחירת המחשב
+        computer_choice = str(random.randint(1, 3))
+        
+        # תרגום המספרים למילים
+        options = {"1": "אבן", "2": "נייר", "3": "מספריים"}
+        user_text = options[user_choice]
+        computer_text = options[computer_choice]
+        
+        # קביעת המנצח
+        if user_choice == computer_choice:
+            result_text = "תיקו"
+        elif (user_choice == '1' and computer_choice == '3') or \
+             (user_choice == '2' and computer_choice == '1') or \
+             (user_choice == '3' and computer_choice == '2'):
+            result_text = "ניצחת"
+        else:
+            result_text = "המחשב ניצח"
+        
+        # הרכבת התגובה הסופית, ואפשרות לשחק שוב
+        final_message = f"t-בחרת {user_text}, המחשב בחר {computer_text}. התוצאה: {result_text}."
+        
+        # נחבר את כל הפקודות יחד
+        commands_to_send = [
+            f"id_list_message={final_message}",
+            "id_list_message=t-למשחק נוסף, הישאר על הקו",
+            # חזרה לתחילת המשחק
+            "go_to_folder=/?x=2&step=1"
+        ]
+        
+        return "&".join(commands_to_send)
 
-        # חוזר להתחלה
-        return f"id_list_message=t-התוצאה היא {d}&go_to_folder=/?x=1&step=1"
-
-    return "id_list_message=t-שגיאה לא צפויה במערכת"
-
-
-# קטע הרצה לשרת כמו Railway
-if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    # במקרה של שלב לא מוכר
+    return "id_list_message=t-שגיאה במשחק אבן נייר ומספריים"
