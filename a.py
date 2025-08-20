@@ -48,7 +48,7 @@ def a_calculator(params):
     # שלב 2: בקשת פעולה
     elif step == "2":
         num1 = params.get("num1")
-        prompt = "t-הקש פעולה. 1 חיבור, 2 חיסור, 3 כפל, 4 חילוק, 5 חזקה"
+        prompt = "t-אנא הקישו פעולה, לחיבור הקישו 1, לחיסור הקישו 2 ,לכפל הקישו 3, לחילוק הקישו 4, לחזקה הקישו 5"
         return_path_params = urlencode({'x': '1', 'step': '3', 'saved_num1': num1})
         return f"read={prompt}=op,,1,1,/?{return_path_params}"
 
@@ -75,7 +75,7 @@ def a_calculator(params):
         except:
             d = "שגיאה בערכים"
 
-        return f"id_list_message=t-התוצאה היא {d}"
+        return f"id_list_message=t-התוצאה היא,  {d}"
 
     return "id_list_message=t-שגיאה לא צפויה במערכת"
 
@@ -88,7 +88,7 @@ def b_rock_paper_scissors(params):
 
     # שלב 1: בקשת בחירה
     if step == "1":
-        prompt = "t-אבן נייר ומספריים. בחר: 1 אבן, 2 נייר, 3 מספריים"
+        prompt = "t-ברוך הבא לאבן נייר ומספריים. אנא בחר, 1 אבן, 2 נייר, 3 מספריים"
         return_path = f"/?x=2&step=2"
         return f"read={prompt}=choice,,1,1,{return_path}"
 
@@ -121,7 +121,7 @@ def c_lottery(params):
 
     # שלב 1: תפריט ראשי
     if step == "1":
-        prompt = "t-משחק ההגרלות. 1 לקובייה אחת, 2 לשתי קוביות, 3 למספר בטווח"
+        prompt = "t-ברוך הבא לשוחת ההגרלות.  הקש 1 לקובייה אחת, 2 לשתי קוביות, 3 לבחירת המספר"
         return_path = f"/?x=3&step=2"
         return f"read={prompt}=lottery_choice,,1,1,{return_path}"
 
@@ -156,4 +156,5 @@ def c_lottery(params):
 # קטע הרצה לשרתים כמו Railway
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
+
     app.run(host='0.0.0.0', port=port)
