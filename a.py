@@ -15,7 +15,7 @@ def flask_controller():
     all_params = request.form if request.method == 'POST' else request.args
     
     final_response_string = yemot_service(all_params)
-    return Response(final_response_string, mimetype='text/plain; charset=UTF-8')
+    return Response("המערכות של אביאל אלוף", mimetype='text/plain; charset=UTF-8')
 
 
 # =======================================================
@@ -158,3 +158,4 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
 
     app.run(host='0.0.0.0', port=port)
+
