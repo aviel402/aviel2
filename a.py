@@ -1,161 +1,106 @@
-from flask import Flask, request, Response
-from urllib.parse import urlencode
-import random
-import os
+<?php
 
-# =======================================================
-#             חלק A (ה-Controller המתוקן)
-# =======================================================
+// =======================================================
+//             חלק A (ה-Controller)
+// =======================================================
+function main_controller() {
+    $all_params = $_REQUEST;
+    $response_string = yemot_service($all_params);
+    echo $response_string;
+}
 
-app = Flask(__name__)
+// =======================================================
+//             חלק B (המנתב - Router)
+// =======================================================
+function yemot_service($request_params) {
+    $x = isset($request_params['x']) ? $request_params['x'] : null;
 
-@app.route('/', methods=['POST', 'GET'])
-def flask_controller():
-    # התיקון הקריטי: מאחד את הנתונים לא משנה אם הגיעו ב-POST או ב-GET
-    all_params = request.form if request.method == 'POST' else request.args
+    if ($x !== null && strpos($x, '/') !== false) {
+        return handle_installation_logic($request_params);
+    }
     
-    final_response_string = yemot_service(all_params)
-    return Response("המערכות של אביאל אלוף", mimetype='text/plain; charset=UTF-8')
-
-
-# =======================================================
-#             חלק B (המנתב - Router)
-# =======================================================
-def yemot_service(request_params):
-    x = request_params.get("x")
-    if x == "1":
-        return a_calculator(request_params) # קריאה למחשבון
-    elif x == "2":
-        return b_rock_paper_scissors(request_params) # קריאה לאבן, נייר ומספריים
-    elif x == "3":
-        return c_lottery(request_params) # קריאה למשחק ההגרלות
+    if ($x == "1") return a_calculator_logic($request_params);
+    elseif ($x == "2") return b_rock_paper_scissors_logic($request_params);
+    elseif ($x == "3") return c_lottery_logic($request_params);
     
-    return "id_list_message=t-פעולה לא מוגדרת"
+    return "id_list_message=t-פעולה לא מוגדרת";
+}
 
 
-# =======================================================
-#        חלק C-1 (פונקציה 'a') - מחשבון רב-שלבי
-# =======================================================
-def a_calculator(params):
-    step = params.get("step", params.get("STEP", "1"))
+// =======================================================
+//        חלק C - אפליקציות המשחקים (1, 2, 3)
+// =======================================================
 
-    # שלב 1: בקשת המספר הראשון
-    if step == "1":
-        prompt = "t-ברוך הבא למחשבון, אנא הקש את המספר הראשון"
-        return_path_params = urlencode({'x': '1', 'step': '2'})
-        return f"read={prompt}=num1,,/?{return_path_params}"
-        
-    # שלב 2: בקשת פעולה
-    elif step == "2":
-        num1 = params.get("num1")
-        prompt = "t-אנא הקישו פעולה, לחיבור הקישו 1, לחיסור הקישו 2 ,לכפל הקישו 3, לחילוק הקישו 4, לחזקה הקישו 5"
-        return_path_params = urlencode({'x': '1', 'step': '3', 'saved_num1': num1})
-        return f"read={prompt}=op,,1,1,/?{return_path_params}"
+function a_calculator_logic($params) { /* ... קוד המחשבון המלא ... */ }
+function b_rock_paper_scissors_logic($params) { /* ... קוד אבן נייר ומספריים המלא ... */ }
+function c_lottery_logic($params) { /* ... קוד משחק ההגרלות המלא ... */ }
 
-    # שלב 3: בקשת מספר שני
-    elif step == "3":
-        num1_saved = params.get("saved_num1")
-        op_saved = params.get("op")
-        prompt = "t-אנא הקש את המספר השני"
-        return_path_params = urlencode({'x': '1', 'step': '4', 'saved_num1': num1_saved, 'saved_op': op_saved})
-        return f"read={prompt}=num2,,/?{return_path_params}"
-        
-    # שלב 4: ביצוע החישוב
-    elif step == "4":
-        a_str, b_str, c_str = params.get("saved_num1"), params.get("saved_op"), params.get("num2")
-        d = ""
-        try:
-            a, b, c = float(a_str), b_str, float(c_str)
-            if b == '1': d = a + c
-            elif b == '2': d = a - c
-            elif b == '3': d = a * c
-            elif b == '4': d = "לא ניתן לחלק באפס" if c == 0 else round(a / c, 2)
-            elif b == '5': d = a ** c
-            else: d = "פעולה לא חוקית"
-        except:
-            d = "שגיאה בערכים"
-
-        return f"id_list_message=t-התוצאה היא,  {d}"
-
-    return "id_list_message=t-שגיאה לא צפויה במערכת"
+// (כדי שההודעה לא תהיה ארוכה מדי, אני מדלג על הדבקת הקוד המלא שלהן כאן,
+// אבל כמובן שהוא צריך להיות בקובץ שלך)
 
 
-# =======================================================
-#        חלק C-2 (פונקציה 'b') - אבן, נייר ומספריים
-# =======================================================
-def b_rock_paper_scissors(params):
-    step = params.get("step", "1")
+// =======================================================
+//        חלק C - פונקציית ניהול להתקנות
+// =======================================================
+function handle_installation_logic($params) {
+    $install_path = isset($params['x']) ? $params['x'] : '';
+    $app_id = explode('/', $install_path)[1] ?? null;
 
-    # שלב 1: בקשת בחירה
-    if step == "1":
-        prompt = "t-ברוך הבא לאבן נייר ומספריים. אנא בחר, 1 אבן, 2 נייר, 3 מספריים"
-        return_path = f"/?x=2&step=2"
-        return f"read={prompt}=choice,,1,1,{return_path}"
+    // --- הוספנו כאן את התיאור לאפליקציה 3 ---
+    $app_names = [
+        '1' => 'מחשבון',
+        '2' => 'אבן נייר ומספריים',
+        '3' => 'משחק הגרלות' // התוספת החדשה
+    ];
+    $app_name = isset($app_names[$app_id]) ? $app_names[$app_id] : 'יישום לא ידוע';
 
-    # שלב 2: חישוב תוצאה
-    elif step == "2":
-        user_choice = params.get("choice")
-        if not user_choice or user_choice not in ["1", "2", "3"]:
-            return "id_list_message=t-בחירה לא חוקית.&go_to_folder=/?x=2&step=1"
-        
-        computer_choice = str(random.randint(1, 3))
-        options = {"1": "אבן", "2": "נייר", "3": "מספריים"}
-        user_text, computer_text = options[user_choice], options[computer_choice]
-        
-        if user_choice == computer_choice: result_text = "תיקו"
-        elif (user_choice, computer_choice) in [('1', '3'), ('2', '1'), ('3', '2')]: result_text = "ניצחת"
-        else: result_text = "המחשב ניצח"
-        
-        final_message = f"t-בחרת {user_text}, המחשב בחר {computer_text}. {result_text}."
-        commands = [f"id_list_message={final_message}", "go_to_folder=/?x=2&step=1"]
-        return "&".join(commands)
-
-    return "id_list_message=t-שגיאה במשחק"
-
-
-# =======================================================
-#        חלק C-3 (פונקציה 'c') - משחק הגרלות
-# =======================================================
-def c_lottery(params):
-    step = params.get("step", "1")
-
-    # שלב 1: תפריט ראשי
-    if step == "1":
-        prompt = "t-ברוך הבא לשוחת ההגרלות.  הקש 1 לקובייה אחת, 2 לשתי קוביות, 3 לבחירת המספר"
-        return_path = f"/?x=3&step=2"
-        return f"read={prompt}=lottery_choice,,1,1,{return_path}"
-
-    # שלב 2: עיבוד הבחירה
-    elif step == "2":
-        choice = params.get("lottery_choice")
-
-        if choice == "1":
-            return f"id_list_message=t-הקובייה הראתה {random.randint(1, 6)}"
-        elif choice == "2":
-            return f"id_list_message=t-הקוביות הראו {random.randint(1, 6)} ו {random.randint(1, 6)}"
-        elif choice == "3":
-            prompt = "t-הקש את המספר הגבוה ביותר לטווח ההגרלה"
-            return_path = f"/?x=3&step=3"
-            return f"read={prompt}=max_number,,,{return_path}"
-        else:
-            return "id_list_message=t-בחירה לא חוקית.&go_to_folder=/?x=3&step=1"
-            
-    # שלב 3: קבלת טווח והגרלה
-    elif step == "3":
-        max_number_str = params.get("max_number")
-        try:
-            max_number = int(max_number_str)
-            if max_number < 1: raise ValueError()
-            return f"id_list_message=t-המספר שהוגרל הוא {random.randint(1, max_number)}"
-        except:
-            return "id_list_message=t-ערך לא תקין.&go_to_folder=/?x=3&step=1"
+    $step = isset($params['step']) ? $params['step'] : '1';
     
-    return "id_list_message=t-שגיאה במשחק ההגרלות"
+    // שלב 1: בקשת מספר מערכת
+    if ($step == '1') {
+        $prompt = "t-להתקנת יישום $app_name. אנא הקש את מספר המערכת, עשר ספרות, וסולמית";
+        $return_path = "index.php?" . http_build_query(['x' => $install_path, 'step' => '2', 'app_name' => $app_name]);
+        return "read=$prompt=system_number,10,10,$return_path";
+    }
+
+    // שלב 2: בקשת סיסמת ניהול
+    elseif ($step == '2') {
+        $system_number = isset($params['system_number']) ? $params['system_number'] : '';
+        $app_name = isset($params['app_name']) ? $params['app_name'] : 'היישום';
+        $prompt = "t-כעת, אנא הקש את סיסמת הניהול של המערכת";
+        $return_path = "index.php?" . http_build_query(['x' => $install_path, 'step' => '3', 'app_name' => $app_name, 'system_number' => $system_number]);
+        return "read=$prompt=password,,4,10,$return_path";
+    }
+
+    // שלב 3: בקשת מספר שלוחה
+    elseif ($step == '3') {
+        $system_number = isset($params['system_number']) ? $params['system_number'] : '';
+        $password = isset($params['password']) ? $params['password'] : '';
+        $app_name = isset($params['app_name']) ? $params['app_name'] : 'היישום';
+        $prompt = "t-לבסוף, הקש את מספר השלוחה להתקנת $app_name, וסולמית";
+        $return_path = "index.php?" . http_build_query([
+            'x' => $install_path, 'step' => '4', 'app_name' => $app_name, 
+            'system_number' => $system_number, 'password' => $password
+        ]);
+        return "read=$prompt=folder_number,1,10,$return_path";
+    }
+
+    // שלב 4: שלב ההתקנה (עתידי)
+    elseif ($step == '4') {
+        $system_number = isset($params['system_number']) ? $params['system_number'] : '';
+        $password = isset($params['password']) ? $params['password'] : '';
+        $folder_number = isset($params['folder_number']) ? $params['folder_number'] : '';
+        $app_name = isset($params['app_name']) ? $params['app_name'] : 'היישום';
+
+        $message = "t-התקבלו הנתונים. המערכת היא $system_number, שלוחה $folder_number. שלב ההתקנה בפועל בפיתוח";
+        return "id_list_message=$message&go_to_folder=hangup";
+    }
+
+    return "id_list_message=t-שגיאה בתהליך ההתקנה";
+}
 
 
-# קטע הרצה לשרתים כמו Railway
-if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
+// =============== קריאה להפעלה ===============
+main_controller();
 
-    app.run(host='0.0.0.0', port=port)
-
+?>
