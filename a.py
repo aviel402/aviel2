@@ -9,4 +9,5 @@ def calculator_main():
     return Response(response_str, mimetype='text/plain; charset=UTF-8')
 
 def B(all):
-    typ=all.get("typ", all.get("typ",1))
+    typ=all.get("typ", "1")
+    if typ == "1": retrun text.b(all)
