@@ -10,3 +10,7 @@ def calculator_main():
     return Response(response_str, mimetype='text/plain; charset=UTF-8')
 
 
+def b(all):
+    text=all.get(txt)
+    text = t- + text
+    reteun text
