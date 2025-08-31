@@ -11,5 +11,5 @@ def calculator_main():
 def B(all):
     typ=all.get("typ", "1")
     if typ == "1":
-        retrun text.b(all)
-    retrun "t- הגדר נתיב"
+        return text.b(all)
+    return "t- הגדר נתיב"
