@@ -34,12 +34,17 @@ def call_render_server(param1, param2, param3):
         return f"שגיאת רשת: {e}"
 
 # דוגמת שימוש
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def example_usage():
-    # קוראים לפונקציה עם ערכים לדוגמה
-    result = call_render_server("hello", "world", "123")
+    a=request.args
+    if not n:
     
+        call_render_server("p.txt", "w", a)
+    else:
+        f = call_render_server("p.txt", "r")
+        return f.read()
     # מחזירים את התוצאה למשתמש (לימות המשיח)
-    return Response(f"id_list_message=t-{result}", mimetype='text/plain')
+    return Response(f"id_list_message=t-התקבל", mimetype='text/plain')
+
 
 
