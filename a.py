@@ -1,6 +1,7 @@
 # זהו הקוד שרץ ב-el
 from flask import Flask, Response, jsonify
 import requests # חשוב להוסיף requests ל-requirements.txt
+import os
 
 app = Flask(__name__)
 
@@ -40,4 +41,5 @@ def example_usage():
     
     # מחזירים את התוצאה למשתמש (לימות המשיח)
     return Response(f"id_list_message=t-{result}", mimetype='text/plain')
+
 
