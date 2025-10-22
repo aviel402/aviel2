@@ -1,50 +1,53 @@
-# זהו הקוד שרץ ב-el
-from flask import Flask, Response, jsonify
-import requests # חשוב להוסיף requests ל-requirements.txt
+# קובץ: a.py (רץ על Vercel)
+
+from flask import Flask, request, Response
+import requests
 import os
 
 app = Flask(__name__)
 
-# הגדרת הכתובת של השרת השני (Render), אותה נשים במשתני הסביבה
+# קוראים את הכתובת של השרת השני מתוך משתני הסביבה של Vercel
 RENDER_SERVER_URL = os.environ.get("RENDER_URL")
 
-# --- פונקציית העזר שביקשת ---
-def call_render_server(param1, param2, param3):
+# --- פונקציית העזר שמתקשרת עם השרת השני ---
+def file_operation(file_path, mode, content=None):
     """
-    פונקציה זו מקבלת 3 פרמטרים, ושולחת אותם לשרת ב-Render.
-    היא מחזירה את התשובה שהתקבלה.
+    מקבלת נתיב לקובץ, מצב (read/write), ותוכן (לכתיבה).
+    שולחת את המידע לשרת ב-Render ומחזירה את התשובה.
     """
     if not RENDER_SERVER_URL:
         return "שגיאה: כתובת שרת הרנדר אינה מוגדרת"
-        
-    # בניית הפרמטרים לשליחה
-    query_params = {'x': param1, 'y': param2, 'z': param3}
-    
-    try:
-        # שליחת הבקשה בשיטת GET
-        response = requests.get(RENDER_SERVER_URL, params=query_params)
-        
-        # בדיקה אם הבקשה הצליחה
-        if response.ok:
-            return response.text # מחזירים את הטקסט שהשרת השני החזיר
-        else:
-            return f"שגיאה בתקשורת עם שרת הרנדר: {response.status_code}"
 
+    # נבנה את הבקשה. הפעם נשתמש בשיטת POST כדי לשלוח מידע
+    data_to_send = {
+        'filepath': file_path,
+        'mode': mode,
+        'content': content
+    }
+
+    try:
+        response = requests.post(RENDER_SERVER_URL, json=data_to_send)
+        if response.ok:
+            return response.json().get('result', 'שגיאה בפורמט התשובה')
+        else:
+            return f"שגיאה בתקשורת עם שרת האחסון: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"שגיאת רשת: {e}"
 
-# דוגמת שימוש
-@app.route('/',methods=['GET','POST'])
-def example_usage():
-    a=request.args
-    if not n:
-    
-        call_render_server("p.txt", "w", a)
+
+@app.route('/', methods=['POST', 'GET'])
+def main_handler():
+    # קולטים פרמטר מהבקשה של ימות המשיח, לדוגמה 'text_to_save'
+    text_to_write = request.values.get("text_to_save")
+
+    # הלוגיקה שלך
+    if text_to_write:
+        # אם יש טקסט חדש לשמור
+        operation_result = file_operation("p.txt", "w", text_to_write)
+        response_text = f"תוצאת פעולת הכתיבה: {operation_result}"
     else:
-        f = call_render_server("p.txt", "r")
-        return f.read()
-    # מחזירים את התוצאה למשתמש (לימות המשיח)
-    return Response(f"id_list_message=t-התקבל", mimetype='text/plain')
-
-
-
+        # אם רוצים לקרוא מהקובץ
+        file_content = file_operation("p.txt", "r")
+        response_text = f"התוכן שקראנו מהקובץ: {file_content}"
+    
+    return Response(f"id_list_message=t-{response_text}", mimetype='text/plain')
